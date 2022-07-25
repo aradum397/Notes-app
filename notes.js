@@ -1,41 +1,59 @@
 const chalk = require('chalk')
 const fs = require('fs')
+const { title } = require('process')
 
-const getNotes = function () {
-	return 'Your notes...'
-}
-
-const addNote = function (title, body) {
+const addNote = (title, body) => {
 	const notes = loadNotes()
-	const duplicateNotes = notes.filter(note => note.title === title)
-	if (duplicateNotes.length === 0) {
+	const duplicateNotes = notes.find(note => note.title === title)
+	debugger
+	if (!duplicateNotes) {
 		notes.push({
 			title,
 			body
 		})
 		saveNotes(notes)
-		console.log(chalk.green('Note added!'))
+		console.log(chalk.inverse.green('Note added!'))
 	} else {
-		console.log(chalk.red('This title already exists!'))
+		console.log(chalk.inverse.red('This title already exists!'))
 	}
 }
 
-const deleteNote = function (title) {const notes = loadNotes()
+const removeNote = (title) => {
+	const notes = loadNotes()
 	const keepNotes = notes.filter(note => note.title !== title)
 	if (notes.length > keepNotes.length) {
 		saveNotes(keepNotes)
-		console.log(chalk.green('Note removed!'))
+		console.log(chalk.inverse.green('Note removed!'))
 	} else {
-		console.log(chalk.red('No note found!'))
+		console.log(chalk.inverse.red('No note found!'))
 	}
 }
 
-const saveNotes = function (notes) {
+const listNotes = () => {
+	const notes = loadNotes()
+	console.log(chalk.inverse('Your notes:'))
+	notes.forEach(note => {
+		console.log(note.title)
+	});
+}
+
+const readNote = (title) => {
+	const notes = loadNotes()
+	const foundNote = notes.find(note => note.title === title)
+	if (foundNote) {
+		console.log(chalk.underline(`${foundNote.title}:`))
+		console.log(foundNote.body)
+	} else {
+		console.log(chalk.inverse.red(`No note by the title of "${title}"`))
+	}
+}
+
+const saveNotes = (notes) => {
 	const dataJSON = JSON.stringify(notes)
 	fs.writeFileSync('notes.json', dataJSON)
 }
 
-const loadNotes = function () {
+const loadNotes = () => {
 	try {
 		const dataBuffer = fs.readFileSync('notes.json')
 		const dataJSON = dataBuffer.toString()
@@ -46,7 +64,8 @@ const loadNotes = function () {
 }
 
 module.exports = {
-	getNotes,
 	addNote,
-	deleteNote
+	removeNote,
+	listNotes,
+	readNote
 }
